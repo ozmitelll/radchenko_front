@@ -1,52 +1,76 @@
 // src/services/auth.service.js
 
 import axios from "axios";
-import authHeader from './auth-header'
+import {jwtDecode} from "jwt-decode";
+import Cookies from "universal-cookie";
 
-const API_URL = "http://localhost:8080/api/auth/";
+const API_URL = "http://172.20.10.2:8000/auth";
 
 class AuthService {
+    constructor() {
+        this.cookies = new Cookies();
+    }
     login(username, password) {
-        return axios
-            .post(API_URL + "signin", {
-                username,
-                password
-            })
-            .then(response => {
-                if (response.data.accessToken) {
-                    localStorage.setItem("user", JSON.stringify(response.data));
-                }
+        const requestBody = new URLSearchParams({
+            'grant_type': '',
+            'username': username,
+            'password': password,
+            'scope': '',
+            'client_id': '',
+            'client_secret': ''
+        });
 
-                return response.data;
+        const config = {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        };
+
+        return axios.post(API_URL+ '/token', requestBody.toString(), config)
+            .then(response => {
+                if (response.data.access_token) {
+                    this.cookies.set("jwt", response.data.access_token, { path: '/' });
+                    return response.status;
+                }
             });
     }
 
     logout() {
-        localStorage.removeItem("user");
+        this.cookies.remove("jwt");
+        localStorage.setItem('hasLoggedInBefore', 'false');
     }
 
-    register(username, email, password) {
-        return axios.post(API_URL + "signup", {
-            username,
-            email,
-            password
-        });
-    }
 
     getCurrentUser() {
-        return JSON.parse(localStorage.getItem('user'));
+        const jwt = this.cookies.get('jwt');
+        if (jwt) {
+            const decodedJwt = jwtDecode(jwt);
+            return {
+                'name': decodedJwt.name,
+                    'email': decodedJwt.email,
+                    'is_admin': decodedJwt.is_admin,
+                    'unit': decodedJwt.unit,
+                    'username': decodedJwt.username
+            } ;
+        }
+        return null;
     }
 
-    createExampleUser() {
-        const exampleUser = {
-            id: 1,
-            username: 'exampleUser',
-            email: 'exampleUser@example.com',
-            accessToken: 'exampleAccessToken'
+    getUnit(id){
+        const config = {
+            headers: {
+                'Accept': 'application/json',
+            }
         };
 
-        localStorage.setItem('user', JSON.stringify(exampleUser));
-    }
-}
+        return axios.get(API_URL + `/${id}/unit`, config)
+            .then(response => {
+                return response.data
+            });
 
-export default new AuthService();
+    }
+
+}
+const authServiceInstance = new AuthService();
+export default authServiceInstance
