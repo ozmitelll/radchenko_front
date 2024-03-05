@@ -72,7 +72,7 @@ const Login = () => {
                     </div>
                 </div>
             </div>
-            <ToastContainer stacked style={{fontFamily: 'Poppins'}} position={"bottom-left"}
+            <ToastContainer stacked style={{fontFamily: 'Poppins'}} position={"bottom-left"}  draggable={true}
             />
         </section>
 

@@ -9,9 +9,10 @@ class OrderService {
     constructor() {
         this.cookies = new Cookies();
     }
-    getOrders(page,unit) {
+
+    getOrders(page, unit) {
         const jwt = this.cookies.get('jwt');
-        if(unit == "") {
+        if (unit == "") {
             const config = {
                 headers: {
                     'Accept': 'application/json',
@@ -25,8 +26,7 @@ class OrderService {
                 .then(response => {
                     return response.data
                 });
-        }
-        else{
+        } else {
             const config = {
                 headers: {
                     'Accept': 'application/json',
@@ -42,33 +42,72 @@ class OrderService {
                     return response.data
                 });
         }
-
-
-
     }
 
-    getOrdersByUnit(unit) {
+    getSortedOrders(){
         const jwt = this.cookies.get('jwt');
         const config = {
             headers: {
                 'Accept': 'application/json',
                 'Authorization': `Bearer ${jwt}`
             },
-            params:{
-                unit:unit
-            }
         };
-
-        return axios.get(API_URL, config)
+        return axios.post(API_URL + '/sorted', config)
             .then(response => {
                 return response.data
             });
+    }
 
+    getOrder(id) {
+        const jwt = this.cookies.get('jwt');
+        const config = {
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${jwt}`
+            },
+        };
+        return axios.get(API_URL + `/${id}`, config)
+            .then(response => {
+                return response.data
+            });
+    }
+
+    confirmOrder(id, date, price) {
+        const jwt = this.cookies.get('jwt');
+        const config = {
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${jwt}`
+            },
+
+        };
+        const data = {
+            status: true,
+            total_cost: price,
+            date: date
+        }
+        return axios.put(API_URL + `/${id}`, data, config)
+            .then(response => {
+                return response.data
+            });
+    }
+
+    deleteOrder(id) {
+        const jwt = this.cookies.get('jwt');
+        const config = {
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${jwt}`
+            },
+        };
+        return axios.delete(API_URL + `/${id}`, config)
+            .then(response => {
+                return response.data
+            });
     }
 
 
-
-    create(data){
+    create(data) {
         const jwt = this.cookies.get('jwt');
         const config = {
             headers: {
@@ -82,7 +121,22 @@ class OrderService {
             });
     }
 
+    getMoneys() {
+        const jwt = this.cookies.get('jwt');
+        const config = {
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${jwt}`
+            }
+        };
+        return axios.post(API_URL + '/money', config)
+            .then(response => {
+                return response.data
+            });
+    }
+
 
 }
+
 const OrderServiceInstance = new OrderService();
 export default OrderServiceInstance

@@ -1,15 +1,17 @@
-import {ToastContainer} from "react-toastify";
+import {toast, ToastContainer} from "react-toastify";
 import OrderService from '../services/order.service';
 import {useEffect, useState} from "react";
 import AuthService from "../services/auth.service";
-import login from "./Login";
+import {useHistory} from "react-router-dom";
 
 const MyOrders = () => {
+    const history = useHistory()
     const [orders, setOrders] = useState([])
     const [user, setUser] = useState(null)
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [searchUnit, setSearchUnit] = useState("");
+    const [historyNumber, setHistoryNumber] = useState("")
 
     useEffect(() => {
         const currentUser = AuthService.getCurrentUser();
@@ -38,7 +40,22 @@ const MyOrders = () => {
         setCurrentPage(1)
 
         await fetchOrders(currentPage,searchUnit)
+        setHistoryNumber(searchUnit)
     }
+
+    const handleDetails = (id)=>{
+        history.push(`orders/${id}`)
+    }
+    const handleDelete = async (id, index)=>{
+        try {
+            await OrderService.deleteOrder(id);
+            await fetchOrders(currentPage,searchUnit);
+            toast.info(`Заявка ${orders[index].number_order} була успішно видалена!`)
+        } catch (error) {
+            console.error("Error deleting order:", error);
+        }
+    }
+
 
     return (
         <div className={'bg-gray-50 dark:bg-gray-900'}>
@@ -67,124 +84,146 @@ const MyOrders = () => {
                     </div>
                 </form>
             </div>
-
-            <div className="relative overflow-x-auto shadow-md">
-                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                        <th scope="col" className="px-6 py-3">
-                            №
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Номер заявки
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            № В/Ч
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Техніка
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Загальна вартість
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Статус
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Дата постановки
-                        </th>
-                        <th scope="col" className="px-6 py-3"></th>
-                        <th scope="col" className="px-6 py-3"></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {orders && orders.map((order, index) => (
-                        <tr key={index}
-                            className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                            <td className="px-6 py-4">
-                                {index + 1}
-                            </td>
-                            <td scope="row"
-                                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                {order.number_order}
-                            </td>
-                            <td scope="row"
-                                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                {order.unit}
-                            </td>
-                            <td className="px-6 py-4">
-                                {order.technics.map((tech, index) => (
-                                    <span key={index}>
-                                        {tech.name}
-                                        {index < order.technics.length - 1 && ', '}
-                                    </span>
-                                ))}
-                            </td>
-                            <td className="px-6 py-4">
-                                {order.total_cost ? order.total_cost + ' грн.' : 'На оцінюванні'}
-                            </td>
-                            <td className="px-6 py-4">
-                                {order.is_active ?
-                                    <div className="flex items-center">
-                                        <div className="h-2.5 w-2.5 rounded-full bg-green-500 me-2"></div>
-                                        Активна
-                                    </div> : <div className="flex items-center">
-                                        <div className="h-2.5 w-2.5 rounded-full bg-red-500 me-2"></div>
-                                        В очікуванні
-                                    </div>
-                                }
-                            </td>
-                            <td className="px-6 py-4">
-                                {new Date(order.time_of_execution).toISOString().slice(0, 19).replace("T", " ")}
-                            </td>
-
-                            <td></td>
-                            <td></td>
+            {orders <= 0 ?
+                <h1 className={'text-5xl text-white text-center my-5 pl-10'}>Заявок від в/ч {historyNumber} не знайдено!</h1> :
+                <div className="relative overflow-x-auto shadow-md">
+                    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                        <thead
+                            className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" className="px-6 py-3">
+                                №
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                Номер заявки
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                № В/Ч
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                Техніка
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                Загальна вартість
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                Статус
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                Дата постановки
+                            </th>
+                            <th scope="col" className="px-6 py-3"></th>
+                            <th scope="col" className="px-6 py-3"></th>
                         </tr>
-                    ))}
-                    </tbody>
-                </table>
-                <div className={'flex justify-center items-center mt-4'}>
-                    <nav aria-label="Page navigation example">
-                        <ul className="inline-flex -space-x-px text-sm ">
-                            <li>
-                                <button
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    className={`flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white rounded-l-2xl`}
-                                    disabled={currentPage === 1}
-                                >
-                                    Previous
-                                </button>
-                            </li>
-                            {Array.from({length: totalPages}, (_, index) => (
-                                <li key={index}>
+                        </thead>
+                        <tbody>
+                        {orders && orders.map((order, index) => (
+                            <tr key={index}
+                                className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                                <td className="px-6 py-4">
+                                    {index + 1}
+                                </td>
+                                <td scope="row"
+                                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                    {order.number_order}
+                                </td>
+                                <td scope="row"
+                                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                    {order.unit}
+                                </td>
+                                <td className="px-6 py-4">
+                                    {order.technics.map((tech, index) => (
+                                        <span key={index}>
+                                        {tech.name}
+                                            {index < order.technics.length - 1 && ', '}
+                                    </span>
+                                    ))}
+                                </td>
+                                <td className="px-6 py-4">
+                                    {order.total_cost ? order.total_cost + ' грн.' : 'На оцінюванні'}
+                                </td>
+                                <td className="px-6 py-4">
+                                    {order.is_active ?
+                                        <div className="flex items-center">
+                                            <div className="h-2.5 w-2.5 rounded-full bg-green-500 me-2"></div>
+                                            Активна
+                                        </div> : <div className="flex items-center">
+                                            <div className="h-2.5 w-2.5 rounded-full bg-red-500 me-2"></div>
+                                            В очікуванні
+                                        </div>
+                                    }
+                                </td>
+                                <td className="px-6 py-4">
+                                    {new Date(order.time_of_execution).toISOString().slice(0, 19).replace("T", " ")}
+                                </td>
+
+                                <td>
                                     <button
-                                        onClick={() => handlePageChange(index + 1)}
-                                        className={`flex items-center justify-center px-3 h-8 leading-tight ${
-                                            currentPage === index + 1
-                                                ? "text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
-                                                : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                                        }`}
+                                        onClick={()=>handleDetails(order.id)}
+                                        className={`flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white`}
                                     >
-                                        {index + 1}
+                                        Перегляд
+                                    </button>
+                                </td>
+                                <td>
+                                    <button
+                                        onClick={()=>handleDelete(order.id, index)}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                             strokeWidth={1.5} stroke="red" className="w-5 h-5">
+                                            <path strokeLinecap="round" strokeLinejoin="round"
+                                                  d="M6 18 18 6M6 6l12 12"/>
+                                        </svg>
+
+                                    </button>
+
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                    <div className={'flex justify-center items-center mt-4'}>
+                        <nav aria-label="Page navigation example">
+                            <ul className="inline-flex -space-x-px text-sm ">
+                                <li>
+                                    <button
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        className={`flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white rounded-l-2xl`}
+                                        disabled={currentPage === 1}
+                                    >
+                                        Назад
                                     </button>
                                 </li>
-                            ))}
-                            <li>
-                                <button
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white rounded-r-2xl`}
-                                    disabled={currentPage === totalPages}
-                                >
-                                    Next
-                                </button>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
+                                {Array.from({length: totalPages}, (_, index) => (
+                                    <li key={index}>
+                                        <button
+                                            onClick={() => handlePageChange(index + 1)}
+                                            className={`flex items-center justify-center px-3 h-8 leading-tight ${
+                                                currentPage === index + 1
+                                                    ? "text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
+                                                    : "text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                                            }`}
+                                        >
+                                            {index + 1}
+                                        </button>
+                                    </li>
+                                ))}
+                                <li>
+                                    <button
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white rounded-r-2xl`}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        Далі
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>}
 
-            <ToastContainer position={"bottom-left"}/>
+
+            <ToastContainer position={"bottom-left"} draggable={true} stacked/>
         </div>
     );
 }

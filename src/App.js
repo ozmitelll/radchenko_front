@@ -10,6 +10,7 @@ import Header from "./components/Header";
 import MyOrders from "./components/MyOrders";
 import CreateOrder from "./components/CreateOrder";
 import Queue from "./components/Queue";
+import DetailOrder from "./components/DetailOrder";
 
 function App() {
     return (
@@ -19,7 +20,8 @@ function App() {
             <Switch>
                 <Route path="/" exact component={Home}/>
                 <Route path="/login" component={Login}/>
-                <PrivateRoute path="/my-orders" component={MyOrders}/>
+                <PrivateRoute path="/orders/:id" component={DetailOrder} />
+                <PrivateRoute path="/orders" component={MyOrders}/>
                 <PrivateRoute path="/create-order" component={CreateOrder}/>
                 <PrivateRoute path="/queue" component={Queue}/>
                 <Route component={NotFound}/>

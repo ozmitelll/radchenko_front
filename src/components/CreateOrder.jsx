@@ -2,8 +2,10 @@ import {useState} from "react";
 import {ToastContainer,toast} from "react-toastify";
 import OrderService from "../services/order.service";
 import AuthService from "../services/auth.service";
+import {useHistory} from "react-router-dom";
 
 const CreateOrder = () => {
+    const history = useHistory()
     const [techniques, setTechniques] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({
@@ -24,6 +26,7 @@ const CreateOrder = () => {
             "time_of_execution": Date.now()
         }
         await OrderService.create(data)
+        history.push('/orders');
     }
     const handleAddTechnique = () => {
         setShowForm(true);
@@ -204,7 +207,7 @@ const CreateOrder = () => {
                 )}
 
             </div>
-            <ToastContainer position={"bottom-left"}/>
+            <ToastContainer position={"bottom-left"} draggable={true}/>
         </section>
     )
 }

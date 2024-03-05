@@ -48,14 +48,14 @@ const Header = () => {
                             </li>
                             <li>
                                 {user && user.is_admin ? <a
-                                    href="/my-orders"
+                                    href="/orders"
                                     className={`block py-2 pr-4 pl-3 ${
                                         location.pathname === "/my-orders" ? "text-white" : "text-gray-500"
                                     } rounded lg:bg-transparent lg:p-0 dark:hover:bg-gray-700 hover:underline transition duration-300`}
                                 >
                                     Заявки
                                 </a> : <a
-                                    href="/my-orders"
+                                    href="/orders"
                                     className={`block py-2 pr-4 pl-3 ${
                                         location.pathname === "/my-orders" ? "text-white" : "text-gray-500"
                                     } rounded lg:bg-transparent lg:p-0 dark:hover:bg-gray-700 hover:underline transition duration-300`}

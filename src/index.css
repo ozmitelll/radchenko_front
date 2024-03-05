@@ -5,6 +5,10 @@
 @tailwind utilities;
 
 
+::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   background-color: rgb(17 24 39);
   margin: 0;
