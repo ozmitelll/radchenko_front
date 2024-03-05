@@ -35,9 +35,14 @@ const Queue = () => {
             const currentDate = new Date();
 
             const progress = ((currentDate - timeOfStart) / (timeOfEnd - timeOfStart)) * 100;
-            return progress.toFixed(4);
+            if(progress > 100)
+                return 100
+            else {
+                return progress.toFixed(4);
+            }
+
         }
-        return 0; // default progress if order is null
+        return 0;
     };
 
     useEffect(() => {

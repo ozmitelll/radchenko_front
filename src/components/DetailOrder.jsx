@@ -45,7 +45,11 @@ const DetailOrder = ({match}) => {
             const currentDate = new Date();
 
             const progress = ((currentDate - timeOfStart) / (timeOfEnd - timeOfStart)) * 100;
-            setProcess(progress);
+            if(progress > 100)
+                setProcess(100);
+            else {
+                setProcess(progress)
+            }
         }
     }
 
@@ -66,7 +70,6 @@ const DetailOrder = ({match}) => {
                 total_cost: e.target.value,
             }));
         }
-        toast.success(`Ціна на заявку ${orderDetails.number_order} була успішно встановлена!`)
     };
 
     const handleDateChange = (e) => {
@@ -147,7 +150,7 @@ const DetailOrder = ({match}) => {
                             />
                             {!editablePrice && !orderDetails.is_active && (
                                 <button
-                                    onClick={() => setEditablePrice(true)}
+                                    onClick={() => {setEditablePrice(true); toast.success('Ціна встановлена!')}}
                                     className="inline-flex items-center w-1/2 justify-center px-2.5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
                                     Встановити ціну
                                 </button>
